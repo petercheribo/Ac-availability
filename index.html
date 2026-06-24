@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agatha Clinical – Staff Availability</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Sans:wght@600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#2E8B8B;--td:#1F6B6B;--tl:#e6f4f4;--tm:#c0dede;
+  --tx:#1a2e2e;--mu:#5a7070;--bo:#d0e4e4;--bg:#f0f7f7;--wh:#fff;--re:#c0392b;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding-bottom:60px}
+
+/* Header */
+.hdr{background:var(--td);color:#fff;padding:24px 20px 20px;border-bottom:4px solid var(--teal)}
+.hdr-org{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.7;margin-bottom:5px}
+.hdr h1{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700}
+.hdr p{margin-top:6px;font-size:12.5px;opacity:.8;line-height:1.5}
+
+/* Notice */
+.notice{background:#fffbea;border-left:4px solid #f0a500;padding:12px 16px;font-size:12.5px;color:#6b4800;line-height:1.5}
+.notice b{display:block;margin-bottom:2px}
+
+/* Body */
+.body{max-width:660px;margin:0 auto;padding:20px 14px 0;display:flex;flex-direction:column;gap:14px}
+
+/* Card */
+.card{background:var(--wh);border:1px solid var(--bo);border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(31,107,107,.06)}
+.ct{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:var(--td);margin-bottom:3px}
+.cs{font-size:12px;color:var(--mu);margin-bottom:13px}
+
+/* Fields */
+.fl{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+.req{color:var(--teal);margin-left:2px}
+input[type=text],input[type=tel],select,textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--bo);border-radius:7px;
+  font-family:'Inter',sans-serif;font-size:13.5px;color:var(--tx);
+  background:var(--wh);outline:none;transition:border-color .15s
+}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(46,139,139,.1)}
+textarea{resize:vertical;min-height:72px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{margin-bottom:12px}
+.fg:last-child{margin-bottom:0}
+
+/* Fortnight pills */
+.fn-list{display:flex;flex-direction:column;gap:8px}
+.fn-opt{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border:2px solid var(--bo);border-radius:9px;cursor:pointer;
+  transition:border-color .15s,background .15s;user-select:none
+}
+.fn-opt:hover,.fn-opt.sel{border-color:var(--teal);background:var(--tl)}
+.fn-opt input{accent-color:var(--teal);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.fn-main{font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;color:var(--td)}
+.fn-sub{font-size:11.5px;color:var(--mu);margin-top:2px}
+.fn-badge{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:10px;background:var(--teal);color:#fff;white-space:nowrap;flex-shrink:0}
+
+/* House grid */
+.hg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ho{
+  display:flex;align-items:center;gap:8px;padding:9px 11px;
+  border:1.5px solid var(--bo);border-radius:7px;cursor:pointer;
+  font-size:13px;transition:border-color .12s,background .12s;user-select:none
+}
+.ho:hover,.ho.sel{border-color:var(--teal);background:var(--tl)}
+.ho.sel{font-weight:600}
+.ho input{accent-color:var(--teal);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+
+/* Shift table */
+#shift-sec{display:none}
+.aw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.at{width:100%;border-collapse:collapse;font-size:12.5px;border:1.5px solid var(--bo);border-radius:8px;overflow:hidden}
+.at th{
+  background:var(--td);color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:7px 5px;text-align:center;white-space:nowrap
+}
+.at th.dth{text-align:left;padding-left:10px;min-width:110px}
+.at td{border-bottom:1px solid var(--bo);border-right:1px solid var(--bo);padding:0}
+.at td:last-child{border-right:none}
+.at tr:last-child td{border-bottom:none}
+.wks td{
+  background:var(--tl);padding:5px 10px;font-size:10.5px;font-weight:700;
+  color:var(--td);letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid var(--tm) !important
+}
+.dc{padding:8px 10px;background:#fafefe;min-width:110px}
+.dn{font-weight:600;font-size:13px}
+.dd{font-size:11px;color:var(--mu);margin-top:1px}
+.sc{text-align:center;min-width:50px}
+.sc label{display:flex;align-items:center;justify-content:center;min-height:40px;cursor:pointer;transition:background .1s}
+.sc label:hover{background:var(--tl)}
+.sc input[type=checkbox]{width:17px;height:17px;accent-color:var(--teal);cursor:pointer}
+.sc.tk label{background:var(--tl)}
+.shl{font-size:10px;font-weight:700;letter-spacing:.03em;display:block}
+.sht{font-size:9px;opacity:.8;font-weight:400}
+
+/* Pills */
+.pills{display:flex;flex-wrap:wrap;gap:7px}
+.pill{
+  display:flex;align-items:center;gap:6px;padding:6px 12px;
+  border:1.5px solid var(--bo);border-radius:20px;font-size:13px;
+  cursor:pointer;transition:border-color .12s,background .12s;user-select:none
+}
+.pill:hover,.pill.sel{border-color:var(--teal);background:var(--tl)}
+.pill.sel{font-weight:500}
+.pill input{accent-color:var(--teal);width:13px;height:13px;cursor:pointer}
+
+/* Submit */
+.btn{
+  width:100%;padding:13px;background:var(--td);color:#fff;border:none;
+  border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;
+  font-weight:700;cursor:pointer;transition:background .15s
+}
+.btn:hover:not(:disabled){background:var(--teal)}
+.btn:disabled{background:#9dbdbd;cursor:not-allowed}
+.spin{
+  display:inline-block;width:15px;height:15px;
+  border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;animation:sp .65s linear infinite;
+  vertical-align:middle;margin-right:7px
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hint{font-size:11.5px;color:var(--mu);text-align:center;margin-top:7px}
+#ferr{color:var(--re);font-size:13px;margin-bottom:10px;display:none;line-height:1.4}
+
+/* Success */
+#succ{display:none;flex-direction:column;align-items:center;text-align:center;padding:56px 20px;max-width:660px;margin:0 auto}
+.ok{width:62px;height:62px;background:var(--tl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:28px;color:var(--td)}
+#succ h2{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:var(--td);margin-bottom:6px}
+#succ p{font-size:13.5px;color:var(--mu)}
+
+@media(max-width:500px){
+  .fr,.hg{grid-template-columns:1fr}
+  .at th,.at td{font-size:11px}
+  .dc{min-width:88px}
+  .sc{min-width:40px}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-org">Agatha Clinical</div>
+  <h1>Staff Availability Form</h1>
+  <p>Select your house and fortnight, then tick every shift you can work.</p>
+</div>
+
+<div class="body" id="fw">
+
+  <!-- Details -->
+  <div class="card">
+    <div class="ct">Your Details</div>
+    <div class="cs">All starred fields are required</div>
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Full Name <span class="req">*</span></label>
+        <input type="text" id="fn" placeholder="e.g. Jane Smith">
+      </div>
+      <div class="fg">
+        <label class="fl">Phone <span class="req">*</span></label>
+        <input type="tel" id="fp" placeholder="04XX XXX XXX">
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Role <span class="req">*</span></label>
+        <select id="fr">
+          <option value="">Select...</option>
+          <option>Support Worker</option>
+          <option>Senior Support Worker</option>
+          <option>Registered Nurse (RN)</option>
+          <option>House Manager</option>
+          <option>Team Leader</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Visa / Work Rights</label>
+        <select id="fv">
+          <option value="">Select...</option>
+          <option>Citizen / PR - no limit</option>
+          <option>Student visa - 48 hrs/fortnight max</option>
+          <option>Other - see notes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- House -->
+  <div class="card">
+    <div class="ct">Select House <span class="req">*</span></div>
+    <div class="cs">Submit a separate form for each house if you work at more than one</div>
+    <div class="hg" id="hg" style="grid-template-columns:1fr 1fr"></div>
+  </div>
+
+  <!-- Fortnight -->
+  <div class="card">
+    <div class="ct">Select Fortnight <span class="req">*</span></div>
+    <div class="cs">Fortnights start Monday 22 Jun 2026 and repeat every 14 days</div>
+    <div class="fn-list" id="fnl"></div>
+  </div>
+
+  <!-- Availability -->
+  <div class="card" id="shift-sec">
+    <div class="ct">Your Availability <span class="req">*</span></div>
+    <div class="cs" id="shift-intro"></div>
+    <div class="aw">
+      <table class="at">
+        <thead id="ath"></thead>
+        <tbody id="atb"></tbody>
+      </table>
+    </div>
+    <div class="fg" style="margin-top:13px">
+      <label class="fl">Notes on specific dates (optional)</label>
+      <textarea id="fdn" placeholder="e.g. 25 Jun - not available until 2 PM"></textarea>
+    </div>
+  </div>
+
+  <!-- Preferences -->
+  <div class="card">
+    <div class="ct">Preferences</div>
+    <div class="fg">
+      <label class="fl">Maximum hours this fortnight</label>
+      <div class="pills" id="ph">
+        <label class="pill"><input type="radio" name="hrs" value="Up to 16 hrs"> Up to 16</label>
+        <label class="pill"><input type="radio" name="hrs" value="Up to 32 hrs"> Up to 32</label>
+        <label class="pill"><input type="radio" name="hrs" value="Up to 48 hrs"> Up to 48</label>
+        <label class="pill"><input type="radio" name="hrs" value="Up to 64 hrs"> Up to 64</label>
+        <label class="pill"><input type="radio" name="hrs" value="No limit"> No limit</label>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:12px">
+      <label class="fl">Current First Aid certificate?</label>
+      <div class="pills" id="pfa">
+        <label class="pill"><input type="radio" name="fa" value="Yes"> Yes</label>
+        <label class="pill"><input type="radio" name="fa" value="No"> No</label>
+        <label class="pill"><input type="radio" name="fa" value="Expiring soon"> Expiring soon</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <div class="ct">General Notes</div>
+    <textarea id="fno" placeholder="Transport issues, leave dates, participant preferences, or anything else rostering should know..." style="min-height:85px"></textarea>
+  </div>
+
+  <!-- Submit -->
+  <div class="card">
+    <div id="ferr"></div>
+    <button class="btn" id="bsub" onclick="doSubmit()">Submit Availability</button>
+    <p class="hint">Saved to Agatha Clinical rostering sheet - reviewed by Peter Kipchumba</p>
+  </div>
+
+</div>
+
+<!-- Success -->
+<div id="succ">
+  <div class="ok">&#10003;</div>
+  <h2>Availability Submitted</h2>
+  <p id="okmsg"></p>
+  <p style="margin-top:6px;font-size:12px;color:var(--mu)">Your entry is now in the rostering spreadsheet.</p>
+  <button class="btn" style="max-width:210px;margin-top:22px" onclick="doReset()">Submit Another</button>
+</div>
+
+<script>
+// ============================================================
+// PASTE YOUR WEB APP URL HERE (between the quotes)
+// Get it from: script.google.com -> Deploy -> Manage deployments
+// ============================================================
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxGjtqkRjQV6WDtsISEJF80pqETES-JZ0Uw-s7Lb2jKoPJ3R4-jBG5AdsWi746tfs4/exec";
+// ============================================================
+
+const HOUSES = {
+  "Orelia House":       {shifts:["D8","AM","EVE","BUD","ND","EM"],          times:{"D8":"0700-1700 (10h)","AM":"1000-1400 (4h)","EVE":"1700-2200 (5h)","BUD":"0700-1100 add-on","ND":"2200-0600 sleepover","EM":"0600-0700 after sleep"}},
+  "Midvale House":      {shifts:["SD","SE","SFEVE","BUD","ND","SFEM","EM"], times:{"SD":"0700-1500 (8h)","SE":"1300-2100 (8h)","SFEVE":"1900-2200 pre-sleep (3h)","BUD":"0700-1100 add-on","ND":"2200-0600 sleepover","SFEM":"0600-1000 after sleep (4h)","EM":"0600-0700 (1h)"}},
+  "Port Kennedy House": {shifts:["PKD","PKE","PKND","PKEM"],                times:{"PKD":"0800-1800 (10h)","PKE":"1700-2200 (5h)","PKND":"2200-0600 sleepover","PKEM":"0600-0900 (3h)"}},
+  "Westminster House":  {shifts:["D8","AM","SA","SB","EVE","EAM","BUD","SC","ND","EM"], times:{"D8":"0700-1700 (10h)","AM":"1000-1400 (4h)","SA":"0630-1430 (8h)","SB":"1400-2230 (8.5h)","EVE":"1700-2200 (5h)","EAM":"0700-1100 (4h)","BUD":"0700-1100 add-on","SC":"2200-0700 overnight (9h)","ND":"2200-0600 sleepover","EM":"0600-0700 after sleep"}},
+};
+
+const ANCHOR  = new Date("2026-06-22T00:00:00");
+const MS_DAY  = 86400000;
+const MS_FN   = 14 * MS_DAY;
+const DAYS    = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MONTHS  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+let selHouse = null;
+let selFN    = null;
+
+// ── Fortnights ───────────────────────────────────────────────
+function makeFNs(n) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const elapsed = today - ANCHOR;
+  const cur = elapsed < 0 ? 0 : Math.floor(elapsed / MS_FN);
+  return Array.from({length: n}, (_, i) => {
+    const s = new Date(ANCHOR.getTime() + (cur + i) * MS_FN);
+    const e = new Date(s.getTime() + 13 * MS_DAY);
+    const dates = Array.from({length:14}, (_,d) => new Date(s.getTime() + d * MS_DAY));
+    return { start:s, end:e, dates, label: fs(s) + " to " + fs(e) };
+  });
+}
+
+function fs(d)  { return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear(); }
+function fss(d) { return d.getDate() + " " + MONTHS[d.getMonth()]; }
+function iso(d) { return d.toISOString().split("T")[0]; }
+
+// ── Build houses ─────────────────────────────────────────────
+function buildHouses() {
+  const g = document.getElementById("hg");
+  Object.keys(HOUSES).forEach(h => {
+    const lbl = document.createElement("label");
+    lbl.className = "ho";
+    lbl.innerHTML = '<input type="radio" name="house" value="' + h + '"> ' + h;
+    lbl.querySelector("input").addEventListener("change", () => {
+      document.querySelectorAll(".ho").forEach(o => o.classList.remove("sel"));
+      lbl.classList.add("sel");
+      selHouse = h;
+      maybeShow();
+    });
+    g.appendChild(lbl);
+  });
+}
+
+// ── Build fortnight picker ───────────────────────────────────
+function buildFNs() {
+  const fns  = makeFNs(6);
+  const list = document.getElementById("fnl");
+  fns.forEach((fn, i) => {
+    const lbl = document.createElement("label");
+    lbl.className = "fn-opt" + (i === 0 ? " sel" : "");
+    lbl.innerHTML =
+      '<input type="radio" name="fn" value="' + i + '" ' + (i === 0 ? "checked" : "") + '>' +
+      '<div>' +
+        '<div class="fn-main">' + fn.label + '</div>' +
+        '<div class="fn-sub">Wk1: ' + fss(fn.dates[0]) + ' - ' + fss(fn.dates[6]) +
+          '&nbsp;&nbsp;|&nbsp;&nbsp;Wk2: ' + fss(fn.dates[7]) + ' - ' + fss(fn.dates[13]) + '</div>' +
+      '</div>' +
+      (i === 0 ? '<span class="fn-badge">Current</span>' : '');
+    lbl.querySelector("input").addEventListener("change", () => {
+      document.querySelectorAll(".fn-opt").forEach(o => o.classList.remove("sel"));
+      lbl.classList.add("sel");
+      selFN = fn;
+      maybeShow();
+    });
+    list.appendChild(lbl);
+    if (i === 0) selFN = fn;
+  });
+}
+
+// ── Show shift grid ──────────────────────────────────────────
+function maybeShow() {
+  if (!selHouse || !selFN) return;
+  buildGrid(selHouse, selFN);
+  const sec = document.getElementById("shift-sec");
+  sec.style.display = "block";
+  setTimeout(() => sec.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+}
+
+function buildGrid(house, fn) {
+  const { shifts, times } = HOUSES[house];
+  const head = document.getElementById("ath");
+  const body = document.getElementById("atb");
+  head.innerHTML = "";
+  body.innerHTML = "";
+
+  document.getElementById("shift-intro").textContent =
+    house + "  |  " + fn.label + "  -  tick every shift you can work on each date.";
+
+  // Header
+  const htr = document.createElement("tr");
+  let th = document.createElement("th"); th.className = "dth"; th.textContent = "Date"; htr.appendChild(th);
+  shifts.forEach(s => {
+    const th = document.createElement("th");
+    const t = (times[s] || "").split("(")[0].trim();
+    th.innerHTML = '<span class="shl">' + s + '</span><span class="sht">' + t + '</span>';
+    htr.appendChild(th);
+  });
+  head.appendChild(htr);
+
+  // Rows
+  fn.dates.forEach((date, di) => {
+    if (di === 0 || di === 7) {
+      const sep = document.createElement("tr");
+      sep.className = "wks";
+      const td = document.createElement("td");
+      td.colSpan = shifts.length + 1;
+      const wkEnd = fn.dates[di + 6];
+      td.textContent = "Week " + (di === 0 ? "1" : "2") + "  -  " + fss(date) + " to " + fss(wkEnd);
+      sep.appendChild(td);
+      body.appendChild(sep);
+    }
+
+    const isoStr = iso(date);
+    const tr = document.createElement("tr");
+
+    const dtd = document.createElement("td");
+    dtd.innerHTML = '<div class="dc"><div class="dn">' + DAYS[date.getDay()] + '</div><div class="dd">' + date.getDate() + " " + MONTHS[date.getMonth()] + '</div></div>';
+    tr.appendChild(dtd);
+
+    shifts.forEach(s => {
+      const td = document.createElement("td");
+      td.className = "sc";
+      const cbId = "cb-" + isoStr + "-" + s;
+      td.innerHTML = '<label for="' + cbId + '"><input type="checkbox" id="' + cbId + '" data-date="' + isoStr + '" data-shift="' + s + '"></label>';
+      td.querySelector("input").addEventListener("change", e => {
+        td.classList.toggle("tk", e.target.checked);
+      });
+      tr.appendChild(td);
+    });
+
+    body.appendChild(tr);
+  });
+}
+
+// ── Pills ────────────────────────────────────────────────────
+function initPills() {
+  ["ph", "pfa"].forEach(gid => {
+    document.getElementById(gid).querySelectorAll(".pill").forEach(p => {
+      p.querySelector("input").addEventListener("change", () => {
+        document.getElementById(gid).querySelectorAll(".pill").forEach(x => x.classList.remove("sel"));
+        p.classList.add("sel");
+      });
+    });
+  });
+}
+
+// ── Collect ──────────────────────────────────────────────────
+function collect() {
+  const avail = {};
+  document.querySelectorAll("#atb input[type=checkbox]:checked").forEach(cb => {
+    const { date, shift } = cb.dataset;
+    if (!avail[date]) avail[date] = [];
+    avail[date].push(shift);
+  });
+  return {
+    name:       document.getElementById("fn").value.trim(),
+    phone:      document.getElementById("fp").value.trim(),
+    role:       document.getElementById("fr").value,
+    visa:       document.getElementById("fv").value,
+    house:      selHouse || "",
+    fortnight:  selFN ? selFN.label : "",
+    availability: avail,
+    dateNotes:  document.getElementById("fdn").value.trim(),
+    maxHours:   (document.querySelector("input[name=hrs]:checked") || {}).value || "",
+    firstAid:   (document.querySelector("input[name=fa]:checked")  || {}).value || "",
+    notes:      document.getElementById("fno").value.trim(),
+  };
+}
+
+function validate(d) {
+  if (!d.name)      return "Please enter your name.";
+  if (!d.phone)     return "Please enter your phone number.";
+  if (!d.role)      return "Please select your role.";
+  if (!d.house)     return "Please select a house.";
+  if (!d.fortnight) return "Please select a fortnight.";
+  if (!Object.keys(d.availability).length) return "Please tick at least one shift.";
+  return null;
+}
+
+// ── Submit ────────────────────────────────────────────────────
+async function doSubmit() {
+  const d   = collect();
+  const err = validate(d);
+  const el  = document.getElementById("ferr");
+
+  if (err) {
+    el.textContent = err;
+    el.style.display = "block";
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  el.style.display = "none";
+
+  if (!WEBAPP_URL) {
+    el.innerHTML = "No Web App URL set.<br>Open this HTML file in a text editor and paste your URL into the WEBAPP_URL variable at the top of the script.";
+    el.style.display = "block";
+    return;
+  }
+
+  const btn = document.getElementById("bsub");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Saving...';
+
+  try {
+    await fetch(WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(d),
+      mode: "no-cors"
+    });
+    document.getElementById("fw").style.display   = "none";
+    document.getElementById("succ").style.display = "flex";
+    document.getElementById("okmsg").textContent  =
+      "Thanks, " + d.name + "! Availability for " + d.house + " (" + d.fortnight + ") has been recorded.";
+  } catch (e) {
+    el.textContent = "Submission failed - check your connection and try again. (" + e.message + ")";
+    el.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Submit Availability";
+  }
+}
+
+// ── Reset ─────────────────────────────────────────────────────
+function doReset() {
+  document.getElementById("fw").style.display   = "flex";
+  document.getElementById("succ").style.display = "none";
+  document.querySelectorAll("input[type=text],input[type=tel],textarea").forEach(el => el.value = "");
+  document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => el.checked = false);
+  document.querySelectorAll(".ho,.fn-opt,.pill").forEach(el => el.classList.remove("sel"));
+  document.querySelectorAll(".sc").forEach(el => el.classList.remove("tk"));
+  document.getElementById("shift-sec").style.display = "none";
+  document.getElementById("ferr").style.display = "none";
+  const btn = document.getElementById("bsub");
+  btn.disabled = false;
+  btn.textContent = "Submit Availability";
+  selHouse = null;
+  const fns = makeFNs(1);
+  selFN = fns[0];
+  document.querySelector(".fn-opt").classList.add("sel");
+  document.querySelector(".fn-opt input").checked = true;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── Init ──────────────────────────────────────────────────────
+buildHouses();
+buildFNs();
+initPills();
+</script>
+</body>
+</html>
