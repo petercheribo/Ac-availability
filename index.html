@@ -486,16 +486,36 @@ async function doSubmit() {
   btn.innerHTML = '<span class="spin"></span>Saving...';
 
   try {
-    await fetch(WEBAPP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(d),
-      mode: "no-cors"
-    });
-    document.getElementById("fw").style.display   = "none";
-    document.getElementById("succ").style.display = "flex";
-    document.getElementById("okmsg").textContent  =
-      "Thanks, " + d.name + "! Availability for " + d.house + " (" + d.fortnight + ") has been recorded.";
+    // Use a hidden iframe + form POST to avoid CORS issues with Apps Script
+    const payload = JSON.stringify(d);
+    const ifrm = document.createElement("iframe");
+    ifrm.name = "hidden_iframe";
+    ifrm.style.display = "none";
+    document.body.appendChild(ifrm);
+
+    const frm = document.createElement("form");
+    frm.method = "POST";
+    frm.action = WEBAPP_URL;
+    frm.target = "hidden_iframe";
+    frm.style.display = "none";
+
+    const inp = document.createElement("input");
+    inp.type = "hidden";
+    inp.name = "payload";
+    inp.value = payload;
+    frm.appendChild(inp);
+    document.body.appendChild(frm);
+
+    ifrm.onload = function() {
+      document.getElementById("fw").style.display   = "none";
+      document.getElementById("succ").style.display = "flex";
+      document.getElementById("okmsg").textContent  =
+        "Thanks, " + d.name + "! Availability for " + d.house + " (" + d.fortnight + ") has been recorded.";
+      document.body.removeChild(frm);
+      document.body.removeChild(ifrm);
+    };
+
+    frm.submit();
   } catch (e) {
     el.textContent = "Submission failed - check your connection and try again. (" + e.message + ")";
     el.style.display = "block";
